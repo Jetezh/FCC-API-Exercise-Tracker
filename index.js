@@ -47,22 +47,52 @@ app.get("/api/users", (req, res) => {
   )
 });
 
-app.post("api/users/:_id/exercises", (req, res) => {
-  
-  
-  const {
-    _id,
-    username,
-    date,
-    duration,
-    description
-  } = req.body;
+app.post("/api/users/:_id/exercises", (req, res) => {
+  const { _id, date, duration } = req.body;
+  const index = dataUsers.findIndex((user) => user._id === _id);
+  const description = req.body.description.toString();
 
+  if(index !== -1) {
+    // const username = dataUsers[index];
+
+    if(description.length > 30) {
+      res.json({message: "Description too long"});
+    } else {
+
+      if(!dataUsers[index].exercises) dataUsers[index].exercises = [];
+      
+      const newExercise = {
+        description,
+        duration, 
+        date: date ? new Date(date).toDateString() : new Date().toDateString(),
+      }
   
+      dataUsers[index].exercises.push(newExercise);
+  
+      res.json({
+        _id: dataUsers[index]._id,
+        username: dataUsers[index].username,
+        description: newExercise.description,
+        duration: newExercise.duration,
+        date: newExercise.date,
+      })
+    }
+  } else {
+    res.json({message: "user not found"});
+  }
 });
 
-app.get("api/users/:_id/logs", (req, res) => {
-  
+app.get("/api/users/:_id/logs", (req, res) => {
+  const userId = req.params._id;
+  const index = dataUsers.findIndex((user) => user._id === userId);
+  const countExercise = dataUsers[index].exercises.length;
+
+  res.json({
+    _id: userId,
+    username: dataUsers[index].username,
+    count: countExercise,
+    log: dataUsers[index].exercises,
+  })
 })
 
 const listener = app.listen(process.env.PORT || 3000, () => {
