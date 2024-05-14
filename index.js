@@ -48,22 +48,23 @@ app.get("/api/users", (req, res) => {
 });
 
 app.post("/api/users/:_id/exercises", (req, res) => {
-  const { _id, date, duration } = req.body;
+  const { date, duration, description } = req.body;
+  const _id = req.body[":_id"];
   const index = dataUsers.findIndex((user) => user._id === _id);
-  const description = req.body.description.toString();
 
   if(index !== -1) {
-    // const username = dataUsers[index];
-
     if(description.length > 30) {
       res.json({message: "Description too long"});
     } else {
+      if(isNaN(duration))
+        return res.json({message: "duration must be a number"})
 
-      if(!dataUsers[index].exercises) dataUsers[index].exercises = [];
+      if(!dataUsers[index].exercises)
+        dataUsers[index].exercises = [];
       
       const newExercise = {
-        description,
-        duration, 
+        description: description.toString(),
+        duration: duration, 
         date: date ? new Date(date).toDateString() : new Date().toDateString(),
       }
   
@@ -83,16 +84,18 @@ app.post("/api/users/:_id/exercises", (req, res) => {
 });
 
 app.get("/api/users/:_id/logs", (req, res) => {
-  const userId = req.params._id;
-  const index = dataUsers.findIndex((user) => user._id === userId);
-  const countExercise = dataUsers[index].exercises.length;
+  const _id = req.params[":_id"];
+  const index = dataUsers.findIndex((user) => user._id === _id);
 
-  res.json({
-    _id: userId,
-    username: dataUsers[index].username,
-    count: countExercise,
-    log: dataUsers[index].exercises,
-  })
+  if(index !== -1) {
+    const user = dataUsers[index];
+    res.json({
+      _id: user._id,
+      username: user.username,
+      count: user.exercises.length,
+      log: user.exercises
+    })
+  }
 })
 
 const listener = app.listen(process.env.PORT || 3000, () => {
