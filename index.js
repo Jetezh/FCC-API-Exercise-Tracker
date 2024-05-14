@@ -61,11 +61,11 @@ app.post("/api/users/:_id/exercises", (req, res) => {
 
       if(!dataUsers[index].exercises)
         dataUsers[index].exercises = [];
-      
+    
       const newExercise = {
-        description: description.toString(),
-        duration: duration, 
-        date: date ? new Date(date).toDateString() : new Date().toDateString(),
+        description,
+        duration, 
+        date: date ? new Date(date).toDateString() : new Date().toDateString()
       }
   
       dataUsers[index].exercises.push(newExercise);
@@ -77,6 +77,8 @@ app.post("/api/users/:_id/exercises", (req, res) => {
         duration: newExercise.duration,
         date: newExercise.date,
       })
+
+      console.log(dataUsers);
     }
   } else {
     res.json({message: "user not found"});
@@ -86,7 +88,7 @@ app.post("/api/users/:_id/exercises", (req, res) => {
 app.get("/api/users/:_id/logs", (req, res) => {
   const _id = req.params[":_id"];
   const index = dataUsers.findIndex((user) => user._id === _id);
-
+  
   if(index !== -1) {
     const user = dataUsers[index];
     res.json({
